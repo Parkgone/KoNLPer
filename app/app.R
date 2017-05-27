@@ -35,7 +35,8 @@ to_character<-function(x){
 index = function() {
   input<-flask$request$form
   input<-py_to_r(input)
-  if(!identical(input$method,NULL)){
+  print(identical(input$method,NULL))
+  if(!identical(input$method,NULL)&){
     return(jsonlite::toJSON(list(functions=funcList)))
   }
   if(identical(input$message,NULL)){
@@ -52,7 +53,7 @@ index = function() {
     output<-out1
     rm(out1)
   }
-  message<-to_character(input$message[1])
+  message<-to_character(input$message)[1]
   if(nchar(message)==0){
     return("please add message over length 0.")
   }
@@ -60,7 +61,7 @@ index = function() {
   if(!call %in% funcList){
     return(paste0("no function available: ",call,
                   "\nplease check available function list.\n",
-                  "req {method: ''}"))
+                  "req {method: 'list'}"))
   }
   result<-do.call(call,list(message))
   print(result)
