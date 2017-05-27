@@ -33,13 +33,13 @@ to_character<-function(x){
 }
 
 
-app$route('/list',methods=list("GET"))({
-  deliverlist<-function(){
+app$route('/list')({
+  list<-function(){
     return(jsonlite::toJSON(list(functions=funcList)))
   }
 })
 
-app$route('/',methods=list("POST"))({
+app$route('/')({
   index = function() {
     input<-flask$request$form
     input<-py_to_r(input)
