@@ -32,68 +32,72 @@ to_character<-function(x){
   return(res)
 }
 
+index = function() {
+  input<-flask$request$form
+  input<-py_to_r(input)
 
-app$route('/list')({
-  list<-function(){
-    return(jsonlite::toJSON(list(functions=funcList)))
+  # treat target req
+  if(identical(input$target,NULL)){
+    return("please add param target.")
+  }else if(length(input$target)>1){
+    target<-input$target[1]
+  }else{
+    target<-input$target
   }
-})
-
-app$route('/')({
-  index = function() {
-    input<-flask$request$form
-    input<-py_to_r(input)
-    
-    # treat target req
-    if(identical(input$target,NULL)){
-      return("please add param target.")
-    }else if(length(input$target)>1){
-      target<-input$target[1]
-    }else{
-      target<-input$target
-    }
-    if(nchar(target)==0){
-      return("please add target over length 0.")
-    }
-    
-    # treat call req
-    if(identical(input$call,NULL)){
-      return("please add param call.")
-    }else if(length(input$call)>1){
-      call<-input$call[1]
-    }else{
-      call<-input$call
-    }
-    if(!call %in% funcList){
-      return(paste0("no function available: ",call,"\n",
-                    "please check available function list.\n",
-                    "GET /list"))
-    }
-    
-    # treat output req
-    if(identical(input$output,NULL)){
-      output<-"all"
-    }else if(length(input$output)>1){
-      output<-input$output[1]
-    }else{
-      output<-input$output
-    }
-    if(!output %in% c("only","all")){
-      return("output params can get only and all.")
-    }
-    
-    result<-do.call(call,list(target))
-    print(result)
-    if(output=="only"){
-      out<-jsonlite::toJSON(list(result=result))    
-    }
-    if(output=="all"){
-      out<-jsonlite::toJSON(list(target=target,
-                                 call=call,
-                                 result=result))
-    }
-    return(out)
+  if(nchar(target)==0){
+    return("please add target over length 0.")
   }
-})
+  
+  # treat call req
+  if(identical(input$call,NULL)){
+    return("please add param call.")
+  }else if(length(input$call)>1){
+    call<-input$call[1]
+  }else{
+    call<-input$call
+  }
+  if(!call %in% funcList){
+    return(paste0("no function available: ",call,"\n",
+                  "please check available function list.\n",
+                  "GET /list"))
+  }
+  
+  # treat output req
+  if(identical(input$output,NULL)){
+    output<-"all"
+  }else if(length(input$output)>1){
+    output<-input$output[1]
+  }else{
+    output<-input$output
+  }
+  if(!output %in% c("only","all")){
+    return("output params can get only and all.")
+  }
+  
+  result<-do.call(call,list(target))
+  print(result)
+  if(output=="only"){
+    out<-jsonlite::toJSON(list(result=result))    
+  }
+  if(output=="all"){
+  out<-jsonlite::toJSON(list(target=target,
+                             call=call,
+                             result=result))
+  }
+  return(out)
+}
 
-app$run(host="0.0.0.0",port=80)
+deliverlist<-function(){
+  return(jsonlite::toJSON(list(functions=funcList)))
+}
+
+app$add_url_rule('/', 'index',
+                 methods=list("POST"),
+                 view_func = index)
+
+app$add_url_rule('/list', 'list',
+                 methods=list("GET"),
+                 view_func = deliverlist)
+
+app$run(host="0.0.0.0",port=5000)
+
