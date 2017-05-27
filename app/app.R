@@ -3,7 +3,7 @@ library(KoNLP, lib.loc = "/usr/local/lib/R/site-library")
 
 useNIADic()
 useSejongDic()
-buildDictionary(ext_dic = "woorimalsam")
+#buildDictionary(ext_dic = "woorimalsam")
 
 flask = import('flask')
 app = flask$Flask('__main__')
