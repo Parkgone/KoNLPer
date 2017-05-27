@@ -1,7 +1,7 @@
 library(reticulate, lib.loc = "/usr/local/lib/R/site-library")
 library(KoNLP, lib.loc = "/usr/local/lib/R/site-library")
 
-useNIADic()
+#useNIADic()
 useSejongDic()
 #buildDictionary(ext_dic = "woorimalsam")
 
