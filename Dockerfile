@@ -33,8 +33,8 @@ RUN apt-get update && R CMD javareconf \
     && Rscript -e 'install.packages(c("Rcpp","curl","reticulate"), lib ="/usr/local/lib/R/site-library")' \
     ## && Rscript -e 'source("https://bioconductor.org/biocLite.R");biocLite("Rcpp");biocLite("RSQLite")' \
     && Rscript -e 'install.packages("KoNLP", lib ="/usr/local/lib/R/site-library")' \
-    && Rscript -e 'library(KoNLP, lib.loc = "/usr/local/lib/R/site-library");useNIADic();buildDictionary(ext_dic = "woorimalsam");useSejongDic()'
-
+    #&& Rscript -e 'library(KoNLP, lib.loc = "/usr/local/lib/R/site-library");useNIADic();buildDictionary(ext_dic = "woorimalsam");useSejongDic()'
+    && Rscript -e 'library(KoNLP, lib.loc = "/usr/local/lib/R/site-library");useNIADic()'
 COPY app/requirements.txt /app/requirements.txt
 WORKDIR /app
 RUN pip3 install -r requirements.txt
