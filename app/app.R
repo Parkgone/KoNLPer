@@ -35,49 +35,68 @@ to_character<-function(x){
 index = function() {
   input<-flask$request$form
   input<-py_to_r(input)
-  print(identical(input$method,NULL))
-  if(!identical(input$method,NULL)&){
-    return(jsonlite::toJSON(list(functions=funcList)))
+
+  # treat target req
+  if(identical(input$target,NULL)){
+    return("please add param target.")
+  }else if(length(input$target)>1){
+    target<-input$target[1]
+  }else{
+    target<-input$target
   }
-  if(identical(input$message,NULL)){
-    return("please add param message.")
+  if(nchar(target)==0){
+    return("please add target over length 0.")
   }
+  
+  # treat call req
   if(identical(input$call,NULL)){
     return("please add param call.")
+  }else if(length(input$call)>1){
+    call<-input$call[1]
+  }else{
+    call<-input$call
   }
+  if(!call %in% funcList){
+    return(paste0("no function available: ",call,"\n",
+                  "please check available function list.\n",
+                  "GET /list"))
+  }
+  
+  # treat output req
   if(identical(input$output,NULL)){
     output<-"all"
+  }else if(length(input$output)>1){
+    output<-input$output[1]
+  }else{
+    output<-input$output
   }
-  out1<-input$output[1]
-  if(out1 %in% c("only","all")){
-    output<-out1
-    rm(out1)
+  if(!output %in% c("only","all")){
+    return("output params can get only and all.")
   }
-  message<-to_character(input$message)[1]
-  if(nchar(message)==0){
-    return("please add message over length 0.")
-  }
-  call<-to_character(input$call[1])
-  if(!call %in% funcList){
-    return(paste0("no function available: ",call,
-                  "\nplease check available function list.\n",
-                  "req {method: 'list'}"))
-  }
-  result<-do.call(call,list(message))
+  
+  result<-do.call(call,list(target))
   print(result)
   if(output=="only"){
     out<-jsonlite::toJSON(list(result=result))    
   }
   if(output=="all"){
-  out<-jsonlite::toJSON(list(message=message,
+  out<-jsonlite::toJSON(list(target=target,
                              call=call,
                              result=result))
   }
   return(out)
 }
 
+deliverlist<-function(){
+  return(jsonlite::toJSON(list(functions=funcList)))
+}
+
 app$add_url_rule('/', 
                  methods=list("POST"),
                  view_func = index)
 
-app$run(host="0.0.0.0",port=5000)
+app$add_url_rule('/list', 
+                 methods=list("GET"),
+                 view_func = deliverlist)
+
+app$run(host="0.0.0.0",port=80)
