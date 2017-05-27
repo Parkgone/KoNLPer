@@ -9,8 +9,8 @@ app = flask$Flask('__main__')
 index = function() {
   input<-flask$request$form
   input<-py_to_r(input)
-  print(dt)
-  print(input$message)
+  message<-py_unicode(input$message)
+  print(message)
   dat<-"test"
   return(dat)
 }
@@ -21,19 +21,19 @@ app$add_url_rule('/',
 
 app$run(host="0.0.0.0",port=5000)
 
-
-KoNLP::HangulAutomata()
-KoNLP::MorphAnalyzer()
-KoNLP::SimplePos09()
-KoNLP::SimplePos22()
-KoNLP::concordance_file()
-KoNLP::concordance_str()
-KoNLP::convertHangulStringToJamos()
-KoNLP::convertHangulStringToKeyStrokes()
-KoNLP::extractNoun()
-KoNLP::is.ascii()
-KoNLP::is.hangul()
-KoNLP::is.jaeum()
-KoNLP::is.jamo()
-KoNLP::is.moeum()
-KoNLP::mutualinformation()
+# 
+# KoNLP::HangulAutomata()
+# KoNLP::MorphAnalyzer()
+# KoNLP::SimplePos09()
+# KoNLP::SimplePos22()
+# KoNLP::concordance_file()
+# KoNLP::concordance_str()
+# KoNLP::convertHangulStringToJamos()
+# KoNLP::convertHangulStringToKeyStrokes()
+# KoNLP::extractNoun()
+# KoNLP::is.ascii()
+# KoNLP::is.hangul()
+# KoNLP::is.jaeum()
+# KoNLP::is.jamo()
+# KoNLP::is.moeum()
+# KoNLP::mutualinformation()

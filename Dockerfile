@@ -7,9 +7,9 @@ RUN apt-get update && apt-get install -y python-pip python-dev build-essential l
 RUN \
   sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list && \
   apt-get update && \
-  apt-get -y upgrade && \
   apt-get install -y build-essential software-properties-common python3-software-properties && \
-  apt-get install -y byobu curl git htop man unzip vim wget gnupg2 libopenblas-base libcurl4-openssl-dev libssh2-1 && \
+  apt-get -y --purge remove libssh2 && \
+  apt-get install -y byobu curl git htop man unzip vim wget gnupg2 libopenblas-base libcurl4-openssl-dev libssh2-1=1.7.0-1 libssh2-1-dev && \
   rm -rf /var/lib/apt/lists/*
 
 
@@ -31,11 +31,10 @@ WORKDIR /data
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
 RUN apt-get update && R CMD javareconf \
-    && Rscript -e 'install.packages(c("Rcpp","curl"), destdir ="/usr/local/lib/R/site-library")' \
-    && Rscript -e 'install.packages("https://cran.r-project.org/src/contrib/reticulate_0.8.tar.gz", repo=NULL, type="source", destdir ="/usr/local/lib/R/site-library")' \
+    && Rscript -e 'install.packages(c("Rcpp","curl","reticulate"), destdir ="/usr/local/lib/R/site-library")' \
     && Rscript -e 'install.packages("KoNLP", destdir ="/usr/local/lib/R/site-library")' \
     && Rscript -e 'install.packages("jsonlite", destdir ="/usr/local/lib/R/site-library")' \
-    && Rscript -e 'library(KoNLP, lib.loc = "/usr/local/lib/R/site-library");useNIADic()'
+    && Rscript -e 'library(KoNLP, lib.loc = "/usr/local/lib/R/site-library");useNIADic();buildDictionary(ext_dic = "woorimalsam")useSejongDic()'
 
 COPY app/requirements.txt /app/requirements.txt
 WORKDIR /app
