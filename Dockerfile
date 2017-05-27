@@ -1,15 +1,14 @@
 FROM r-base:latest
 MAINTAINER chanyub.park "mrchypark@gmail.com"
 
-RUN apt-get update && apt-get install -y python-pip python-dev build-essential libssl-dev libffi-dev
+RUN apt-get update && apt-get install -y python3-pip python3-dev build-essential libssl-dev libffi-dev
 
 # pre set for install
 RUN \
   sed -i 's/# \(.*multiverse$\)/\1/g' /etc/apt/sources.list && \
   apt-get update && \
   apt-get install -y build-essential software-properties-common python3-software-properties && \
-  apt-get -y --purge remove libssh2 && \
-  apt-get install -y byobu curl git htop man unzip vim wget gnupg2 libopenblas-base libcurl4-openssl-dev libssh2-1=1.7.0-1 libssh2-1-dev && \
+  apt-get install -y byobu curl git htop man unzip vim wget gnupg2 libopenblas-base libcurl4-openssl-dev && \
   rm -rf /var/lib/apt/lists/*
 
 
@@ -31,16 +30,18 @@ WORKDIR /data
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
 RUN apt-get update && R CMD javareconf \
-    && Rscript -e 'install.packages(c("Rcpp","curl","reticulate"), destdir ="/usr/local/lib/R/site-library")' \
-    && Rscript -e 'install.packages("KoNLP", destdir ="/usr/local/lib/R/site-library")' \
-    && Rscript -e 'install.packages("jsonlite", destdir ="/usr/local/lib/R/site-library")' \
-    && Rscript -e 'library(KoNLP, lib.loc = "/usr/local/lib/R/site-library");useNIADic();buildDictionary(ext_dic = "woorimalsam")useSejongDic()'
+    && Rscript -e 'install.packages(c("Rcpp","curl","reticulate"), lib ="/usr/local/lib/R/site-library")' \
+    ## && Rscript -e 'source("https://bioconductor.org/biocLite.R");biocLite("Rcpp");biocLite("RSQLite")' \
+    && Rscript -e 'install.packages("KoNLP", lib ="/usr/local/lib/R/site-library")' \
+    ## && Rscript -e 'install.packages("jsonlite", lib ="/usr/local/lib/R/site-library")' \
+    && Rscript -e 'install.packages("stringi")' \
+    && Rscript -e 'library(KoNLP, lib.loc = "/usr/local/lib/R/site-library");useNIADic();buildDictionary(ext_dic = "woorimalsam");useSejongDic()'
 
 COPY app/requirements.txt /app/requirements.txt
 WORKDIR /app
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
-ENV LANG="ko_KR.UTF-8"
+ENV LANG="en_US.UTF-8"
 
 COPY app/ /app
 WORKDIR /app

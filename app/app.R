@@ -1,7 +1,11 @@
 library(reticulate, lib.loc = "/usr/local/lib/R/site-library")
 library(KoNLP, lib.loc = "/usr/local/lib/R/site-library")
+library(stringi)
+library(jsonlite)
 
-reloadAllDic()
+useNIADic()
+useSejongDic()
+buildDictionary(ext_dic = "woorimalsam")
 
 flask = import('flask')
 app = flask$Flask('__main__')
@@ -10,9 +14,11 @@ index = function() {
   input<-flask$request$form
   input<-py_to_r(input)
   message<-py_unicode(input$message)
-  print(message)
-  dat<-"test"
-  return(dat)
+  message<-as.character(message)
+  result<-SimplePos09(message)
+  print(result)
+  print(class(result))
+  return(jsonlite::toJSON(list(message=message,result=result)))
 }
 
 app$add_url_rule('/', 
