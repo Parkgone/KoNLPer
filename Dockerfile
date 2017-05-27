@@ -33,8 +33,6 @@ RUN apt-get update && R CMD javareconf \
     && Rscript -e 'install.packages(c("Rcpp","curl","reticulate"), lib ="/usr/local/lib/R/site-library")' \
     ## && Rscript -e 'source("https://bioconductor.org/biocLite.R");biocLite("Rcpp");biocLite("RSQLite")' \
     && Rscript -e 'install.packages("KoNLP", lib ="/usr/local/lib/R/site-library")' \
-    ## && Rscript -e 'install.packages("jsonlite", lib ="/usr/local/lib/R/site-library")' \
-    && Rscript -e 'install.packages("stringi")' \
     && Rscript -e 'library(KoNLP, lib.loc = "/usr/local/lib/R/site-library");useNIADic();buildDictionary(ext_dic = "woorimalsam");useSejongDic()'
 
 COPY app/requirements.txt /app/requirements.txt

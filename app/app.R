@@ -1,7 +1,5 @@
 library(reticulate, lib.loc = "/usr/local/lib/R/site-library")
 library(KoNLP, lib.loc = "/usr/local/lib/R/site-library")
-library(stringi)
-library(jsonlite)
 
 useNIADic()
 useSejongDic()
@@ -38,28 +36,28 @@ index = function() {
 
   # treat target req
   if(identical(input$target,NULL)){
-    return("please add param target.")
+    return(jsonlite::toJSON("please add param target."))
   }else if(length(input$target)>1){
     target<-input$target[1]
   }else{
     target<-input$target
   }
   if(nchar(target)==0){
-    return("please add target over length 0.")
+    return(jsonlite::toJSON("please add target over length 0."))
   }
   
   # treat call req
   if(identical(input$call,NULL)){
-    return("please add param call.")
+    return(jsonlite::toJSON("please add param call."))
   }else if(length(input$call)>1){
     call<-input$call[1]
   }else{
     call<-input$call
   }
   if(!call %in% funcList){
-    return(paste0("no function available: ",call,"\n",
+    return(jsonlite::toJSON(paste0("no function available: ",call,"\n",
                   "please check available function list.\n",
-                  "GET /list"))
+                  "GET /list")))
   }
   
   # treat output req
@@ -71,7 +69,7 @@ index = function() {
     output<-input$output
   }
   if(!output %in% c("only","all")){
-    return("output params can get only and all.")
+    return(jsonlite::toJSON("output params can get only and all."))
   }
   
   result<-do.call(call,list(target))
