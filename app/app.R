@@ -91,7 +91,7 @@ deliverlist<-function(){
 }
 
 index<-function(){
-  return( redirect("https://github.com/mrchypark/KoNLPer") )
+  return( flask$redirect("https://github.com/mrchypark/KoNLPer") )
 }
 
 app$add_url_rule('/', 'functions',
