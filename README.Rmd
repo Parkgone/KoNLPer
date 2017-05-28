@@ -5,45 +5,193 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(curl)
 library(httr)
+library(jsonlite)
 ```
+
+## introduce
+
+KoNLPer는 [reticulate][1]와 [Flask][2]를 이용해서 [KoNLP][6]의 함수를 POST 요청으로 결과를 받을 수 있도록 구성된 R로 작성한 API 서버입니다. 성능이 뛰어나거나 대량 처리가 가능하지는 않고, java 설치 문제가 혹시 있는 분들이 테스트를 해볼 수 있는 방법을 제공해드리는데 의의를 두고 있습니다.
 
 ## How to use
 
 ### docker
 
-KoNLPer는 [reticulate][1]와 [Flask][2]를 이용해서 [KoNLP][6]의 함수를 POST 요청으로 결과를 받을 수 있도록 구성된 API 서버입니다.  
 docker image는 [mrchypark/konlper][3]로 바로 사용 가능합니다.
 
 ```
-docker run -p 80:5000 mrchypark/konlper
+docker run -d -p 80:5000 mrchypark/konlper
 ```
 
 `ENV`로 사전의 범위를 설정할 수 있습니다. S는 세종사전, N은 NIA사전, W는 우리샘사전입니다. `ENV=S`인 경우 세종사전 추가, `ENV=N`인 경우 NIA사전 추가입니다. `ENV=SNW`는 전체 사전 추가입니다. (로 만들고 있는 중입니다.)
 
 ### api 
 
-현재 테스트 서버가 운영중이며 [google app engine][4]에 올리고 [duckdns.org][5]로 주소를 확보했습니다.
+현재 테스트 서버가 운영중이며 [google app engine][4]에 올리고 [duckdns.org][5]로 [주소][7]를 확보했습니다. 기본 url에 `GET` 요청시 현재 페이지로 리다리렉트 됩니다.
 
 아래 쉘 명령으로 동작 가능한 함수의 리스트를 받을 수 있습니다.
 ```
 curl -X GET "http://konlper.duckdns.org/list"
 ```
+
 R에서는 `curl`이나 `httr`에서 제공하는 함수를 바탕으로 요청할 수 있습니다.
 ```{R}
+# set url
 tar<-"http://konlper.duckdns.org/list"
-tar<-GET(tar)
-content(tar,"parsed")
+
+# curl
+datc<-curl_fetch_memory(tar)
+fromJSON(rawToChar(datc$content))
+
+# httr
+dath<-GET(tar)
+content(dath,"parsed")
 ```
 
 
 [KoNLP][6]를 확인해서 어떻게 사용하는지 확인하세요. 아직 옵션이 있는 함수는 제대로 동작하지 않거나 기본 옵션으로만 동작합니다.
 
-POST 요청으로 결과를 JSON 형태로 받을 수 있습니다.
+POST에서 `form` 요청으로 결과를 JSON 형태로 받을 수 있습니다.
+`param` 중 `target`, `call`은 필수이고, `output`은 없으면 `all`이 기본으로 동작합니다. `all`로 진행되면 `target`, `call`, `result`로 결과를 돌려주며 `only`로 요청하면 `result`만 결과를 줍니다. `target`은 1개만 가능합니다.
 
+```{r}
+# set url
+tar<-"http://konlper.duckdns.org/"
 
+# set body for POST req using httr
+bodyo<-list(target = "롯데마트가 판매하고 있는 흑마늘 양념 치킨이 논란이 되고 있다.",
+           call = "extractNoun",
+           output = "only")
+
+# POST req
+dato<-POST(tar,body = bodyo, encode = "form")
+
+# parse result
+content(dato,"parsed")
+
+# set url
+tar<-"http://konlper.duckdns.org/"
+
+# set body for POST req using httr
+bodya<-list(target = "롯데마트가 판매하고 있는 흑마늘 양념 치킨이 논란이 되고 있다.",
+           call = "HangulAutomata",
+           output = "all")
+# POST req
+data<-POST(tar,body = bodya, encode = "form")
+
+# parse result
+content(data,"parsed")
+```
 
 현재 세종사전만 반영되어 있습니다. 무료 티어를 사용해서 속도가 매우 느립니다.
+
+#### 함수 사용예
+
+KoNLP의 [공식 문서][6]를 참고해 주세요.
+
+```{r}
+# set url
+tar<-"http://konlper.duckdns.org/"
+
+body<-list(target = "롯데마트가 판매하고 있는 흑마늘 양념 치킨이 논란이 되고 있다.",
+           call = "convertHangulStringToJamos",
+           output = "all")
+data<-POST(tar, body = body, encode = "form")
+
+res<-content(data,"parsed")
+res
+
+targ<-c()
+for(i in 1:length(res$result)){
+  targ <-c(targ, res$result[[i]])
+}
+
+targ<-paste(targ, collapse="")
+targ
+
+body<-list(target = targ,
+           call = "HangulAutomata",
+           output = "all")
+# POST req
+data<-POST(tar, body = body, encode = "form")
+
+# parse result
+res<-content(data,"parsed")
+res$result
+
+body<-list(target = "롯데마트가 판매하고 있는 흑마늘 양념 치킨이 논란이 되고 있다.",
+           call = "convertHangulStringToJamos",
+           output = "all")
+data<-POST(tar, body = body, encode = "form")
+
+res<-content(data,"parsed")
+res
+
+body<-list(target = "롯데마트가 판매하고 있는 흑마늘 양념 치킨이 논란이 되고 있다.",
+           call = "MorphAnalyzer",
+           output = "all")
+data<-POST(tar, body = body, encode = "form")
+
+res<-content(data,"parsed")
+res
+
+body<-list(target = "롯데마트가 판매하고 있는 흑마늘 양념 치킨이 논란이 되고 있다.",
+           call = "SimplePos22",
+           output = "all")
+data<-POST(tar, body = body, encode = "form")
+
+res<-content(data,"parsed")
+res
+
+body<-list(target = "롯데마트가 판매하고 있는 흑마늘 양념 치킨이 논란이 되고 있다.",
+           call = "SimplePos09",
+           output = "all")
+data<-POST(tar, body = body, encode = "form")
+
+res<-content(data,"parsed")
+res
+
+body<-list(target = "롯데마트가 판매하고 있는 흑마늘 양념 치킨이 논란이 되고 있다.",
+           call = "extractNoun",
+           output = "all")
+data<-POST(tar, body = body, encode = "form")
+
+res<-content(data,"parsed")
+res
+
+body<-list(target = "롯데마트가 판매하고 있는 흑마늘 양념 치킨이 논란이 되고 있다.",
+           call = "is.ascii",
+           output = "all")
+data<-POST(tar, body = body, encode = "form")
+
+res<-content(data,"parsed")
+res
+
+body<-list(target = "롯데마트가 판매하고 있는 흑마늘 양념 치킨이 논란이 되고 있다.",
+           call = "is.hangul",
+           output = "all")
+data<-POST(tar, body = body, encode = "form")
+
+res<-content(data,"parsed")
+res
+
+body<-list(target = "ㄹ",
+           call = "is.jaeum",
+           output = "all")
+data<-POST(tar, body = body, encode = "form")
+
+res<-content(data,"parsed")
+res
+
+body<-list(target = "ㅓ",
+           call = "is.moeum",
+           output = "all")
+data<-POST(tar, body = body, encode = "form")
+
+res<-content(data,"parsed")
+res
+```
 
 [1]: https://rstudio.github.io/reticulate/
 [2]: flask-docs-kr.readthedocs.io
@@ -51,3 +199,4 @@ POST 요청으로 결과를 JSON 형태로 받을 수 있습니다.
 [4]: https://appengine.google.com/
 [5]: https://www.duckdns.org/
 [6]: https://cran.r-project.org/web/packages/KoNLP/vignettes/KoNLP-API.html
+[7]: http://konlper.duckdns.org/

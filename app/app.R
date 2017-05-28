@@ -13,8 +13,6 @@ funcList<-c("HangulAutomata",
             "MorphAnalyzer",
             "SimplePos09",
             "SimplePos22",
-            "concordance_file",
-            "concordance_str",
             "convertHangulStringToJamos",
             "convertHangulStringToKeyStrokes",
             "extractNoun",
@@ -22,8 +20,7 @@ funcList<-c("HangulAutomata",
             "is.hangul",
             "is.jaeum",
             "is.jamo",
-            "is.moeum",
-            "mutualinformation")
+            "is.moeum")
 
 to_character<-function(x){
   res<-py_unicode(x)
