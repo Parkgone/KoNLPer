@@ -6,6 +6,7 @@ useSejongDic()
 #buildDictionary(ext_dic = "woorimalsam")
 
 flask = import('flask')
+
 app = flask$Flask('__main__')
 
 funcList<-c("HangulAutomata",
@@ -30,7 +31,7 @@ to_character<-function(x){
   return(res)
 }
 
-index = function() {
+functions = function() {
   input<-flask$request$form
   input<-py_to_r(input)
 
@@ -43,19 +44,19 @@ index = function() {
     target<-input$target
   }
   if(nchar(target)==0){
-    return(jsonlite::toJSON("please add target over length 0."))
+    return(flask$json$jsonify("please add target over length 0."))
   }
   
   # treat call req
   if(identical(input$call,NULL)){
-    return(jsonlite::toJSON("please add param call."))
+    return(flask$json$jsonify("please add param call."))
   }else if(length(input$call)>1){
     call<-input$call[1]
   }else{
     call<-input$call
   }
   if(!call %in% funcList){
-    return(jsonlite::toJSON(paste0("no function available: ",call,"\n",
+    return(flask$json$jsonify(paste0("no function available: ",call,"\n",
                   "please check available function list.\n",
                   "GET /list")))
   }
@@ -69,16 +70,16 @@ index = function() {
     output<-input$output
   }
   if(!output %in% c("only","all")){
-    return(jsonlite::toJSON("output params can get only and all."))
+    return(flask$json$jsonify("output params can get only and all."))
   }
   
   result<-do.call(call,list(target))
   print(result)
   if(output=="only"){
-    out<-jsonlite::toJSON(list(result=result))    
+    out<-flask$json$jsonify(list(result=result))    
   }
   if(output=="all"){
-  out<-jsonlite::toJSON(list(target=target,
+  out<-flask$json$jsonify(list(target=target,
                              call=call,
                              result=result))
   }
@@ -86,11 +87,19 @@ index = function() {
 }
 
 deliverlist<-function(){
-  return(jsonlite::toJSON(list(functions=funcList)))
+  return(flask$json$jsonify(list(functions=funcList)))
 }
 
-app$add_url_rule('/', 'index',
+index<-function(){
+  return( redirect("https://github.com/mrchypark/KoNLPer") )
+}
+
+app$add_url_rule('/', 'functions',
                  methods=list("POST"),
+                 view_func = functions)
+
+app$add_url_rule('/', 'index',
+                 methods=list("GET"),
                  view_func = index)
 
 app$add_url_rule('/list', 'list',
