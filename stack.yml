@@ -2,7 +2,7 @@ version: "3"
 services:
 
     konlper:
-      image: 210.123.23.82:7000/gate
+      image: mrchypark/konlper
       ports: 
         - "80:5000"
       deploy:
