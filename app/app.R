@@ -103,5 +103,5 @@ app$add_url_rule('/list', 'list',
                  methods=list("GET"),
                  view_func = deliverlist)
 
-app$run(host="0.0.0.0",port=5000)
+app$run(host="0.0.0.0",port=5000, threaded=T)
 
